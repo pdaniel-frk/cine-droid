@@ -27,7 +27,6 @@ import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -44,7 +43,6 @@ public class ListCinemasActivity extends ListActivity {
 	public static final int SORT_NEAREST = 1;
 
 	ArrayAdapter<CinemaLocation> cinemaLocationAdapter;
-	Location userLocation;
 	private ProgressDialog progressDialog;
 
 	/**
