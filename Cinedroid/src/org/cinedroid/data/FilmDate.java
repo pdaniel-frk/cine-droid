@@ -15,7 +15,6 @@
  */
 package org.cinedroid.data;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,12 +30,6 @@ public class FilmDate {
 
 	private String date;
 	private List<FilmPerformance> performances;
-	public final static DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("EEE d MMM");
-	/**
-	 * Date formatters.
-	 */
-	public final static DateFormat PARSE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
-
 	/**
 	 * @return the performances
 	 */
@@ -69,8 +62,8 @@ public class FilmDate {
 
 	public final static String formatDate(final FilmDate date) {
 		try {
-			Date d = FilmDate.PARSE_DATE_FORMAT.parse(date.getDate());
-			return FilmDate.OUTPUT_DATE_FORMAT.format(d);
+			Date d = new SimpleDateFormat("yyyyMMdd").parse(date.getDate());
+			return new SimpleDateFormat("EEE d MMM").format(d);
 		}
 		catch (ParseException e) {
 			Log.e("org.cineworld", String.format("Unable to parse date %s", date.getDate()), e);
