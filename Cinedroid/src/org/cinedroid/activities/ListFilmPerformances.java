@@ -88,7 +88,8 @@ public class ListFilmPerformances extends ListActivity {
 		this.requestCount = filmDates.size();
 		for (FilmDate filmDate : filmDates) {
 			NameValuePair date = new BasicNameValuePair(RetrievePerformancesTask.DATE_PARAM_KEY, filmDate.getDate());
-			new RetrievePerformancesTask(onPerformanceRecieved, filmDate).execute(this.cinemaId, this.filmEdi, date);
+			new RetrievePerformancesTask(onPerformanceRecieved, getString(R.string.cineworld_api_key), filmDate).execute(this.cinemaId,
+					this.filmEdi, date);
 		}
 	}
 
@@ -259,7 +260,7 @@ public class ListFilmPerformances extends ListActivity {
 
 		this.filmEdi = new BasicNameValuePair(RetrievePerformancesTask.FILM_PARAM_KEY, Integer.toString(getIntent().getExtras().getInt(
 				FILM_EDI)));
-		new RetrieveDatesTask(onDatesRetrievedCallback).execute(this.cinemaId);
+		new RetrieveDatesTask(onDatesRetrievedCallback, getString(R.string.cineworld_api_key)).execute(this.cinemaId);
 
 		this.progressDialog = ProgressDialog.show(this, "", "Retrieving performances, please wait...", false);
 	}

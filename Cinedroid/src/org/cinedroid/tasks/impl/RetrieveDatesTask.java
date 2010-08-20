@@ -24,7 +24,6 @@ import org.cinedroid.tasks.CineworldAPIRequestTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-
 /**
  * @author Kingamajick
  * 
@@ -42,9 +41,10 @@ public class RetrieveDatesTask extends CineworldAPIRequestTask<Void, FilmDate> {
 
 	/**
 	 * @param callback
+	 * @param apiKey
 	 */
-	public RetrieveDatesTask(final ActivityCallback callback) {
-		super(callback);
+	public RetrieveDatesTask(final ActivityCallback callback, final String apiKey) {
+		super(callback, apiKey);
 	}
 
 	/*
