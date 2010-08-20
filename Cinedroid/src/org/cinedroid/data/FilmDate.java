@@ -27,9 +27,10 @@ import android.util.Log;
  * 
  */
 public class FilmDate {
-
+	private final static String TAG = FilmDate.class.getName();
 	private String date;
 	private List<FilmPerformance> performances;
+
 	/**
 	 * @return the performances
 	 */
@@ -66,7 +67,7 @@ public class FilmDate {
 			return new SimpleDateFormat("EEE d MMM").format(d);
 		}
 		catch (ParseException e) {
-			Log.e("org.cineworld", String.format("Unable to parse date %s", date.getDate()), e);
+			Log.e(TAG, String.format("Unable to parse date %s", date.getDate()), e);
 			return "";
 		}
 	}

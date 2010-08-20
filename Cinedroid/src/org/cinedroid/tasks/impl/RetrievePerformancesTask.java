@@ -35,6 +35,7 @@ import android.util.Log;
  * 
  */
 public class RetrievePerformancesTask extends CineworldAPIRequestTask<Void, FilmPerformance> {
+	private final static String TAG = RetrievePerformancesTask.class.getName();
 	/**
 	 * The id of the cinema to filter by.
 	 */
@@ -124,13 +125,13 @@ public class RetrievePerformancesTask extends CineworldAPIRequestTask<Void, Film
 			for (Iterator<FilmPerformance> i = filmDate.getPerformances().iterator(); i.hasNext();) {
 				String time = i.next().getTime().replace(":", ""); // Get the time with the : removed.
 				performanceDate.parse(String.format("%sT%s00", date, time));
-				Log.d("org.cineworld", String.format("Checking %s", performanceDate.format("%d %b %H:%M")));
+				Log.d(TAG, String.format("Checking %s", performanceDate.format("%d %b %H:%M")));
 				if (currentTime.after(performanceDate)) {
-					Log.d("org.cineworld", String.format("Removed %s", performanceDate.format("%d %b %H:%M")));
+					Log.d(TAG, String.format("Removed %s", performanceDate.format("%d %b %H:%M")));
 					i.remove();
 				}
 			}
 		}
-		Log.d("org.cineworld", String.format("Current Time %s", currentTime.toString()));
+		Log.d(TAG, String.format("Current Time %s", currentTime.toString()));
 	}
 }

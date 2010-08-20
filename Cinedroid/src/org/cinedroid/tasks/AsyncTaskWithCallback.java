@@ -26,7 +26,7 @@ import android.util.Log;
  * 
  */
 public abstract class AsyncTaskWithCallback<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
-
+	private final static String TAG = AsyncTaskWithCallback.class.getName();
 	protected final ActivityCallback callback;
 
 	/**
@@ -52,8 +52,7 @@ public abstract class AsyncTaskWithCallback<Params, Progress, Result> extends As
 
 			}
 			catch (Exception e) {
-				Log.e("org.cineworld",
-						String.format("Callback %s failed on %s", this.callback.getName(), this.receiver.getClass().getName()), e);
+				Log.e(TAG, String.format("Callback %s failed on %s", this.callback.getName(), this.receiver.getClass().getName()), e);
 			}
 		}
 	}
@@ -73,7 +72,7 @@ public abstract class AsyncTaskWithCallback<Params, Progress, Result> extends As
 			return callback;
 		}
 		catch (Exception e) {
-			Log.e("org.cineworld", String.format("Unable to create callback function %s#%s", reciever.getClass().getName(), methodName), e);
+			Log.e(TAG, String.format("Unable to create callback function %s#%s", reciever.getClass().getName(), methodName), e);
 		}
 		return null;
 	}

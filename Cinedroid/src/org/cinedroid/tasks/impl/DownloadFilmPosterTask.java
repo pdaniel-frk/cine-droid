@@ -21,7 +21,6 @@ import java.net.URL;
 
 import org.cinedroid.tasks.AsyncTaskWithCallback;
 
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -31,6 +30,7 @@ import android.util.Log;
  * 
  */
 public class DownloadFilmPosterTask extends AsyncTaskWithCallback<String, Void, Bitmap> {
+	private final static String TAG = DownloadFilmPosterTask.class.getName();
 
 	/**
 	 * @param callback
@@ -55,11 +55,11 @@ public class DownloadFilmPosterTask extends AsyncTaskWithCallback<String, Void, 
 			return BitmapFactory.decodeStream(url.openStream());
 		}
 		catch (MalformedURLException e) {
-			Log.e("org.cineworld", String.format("Film poster url %s malformed", urlStr), e);
+			Log.e(TAG, String.format("Film poster url %s malformed", urlStr), e);
 			return null;
 		}
 		catch (IOException e) {
-			Log.e("org.cineworld", String.format("Unable to download film poster from url %s", urlStr), e);
+			Log.e(TAG, String.format("Unable to download film poster from url %s", urlStr), e);
 			return null;
 		}
 
