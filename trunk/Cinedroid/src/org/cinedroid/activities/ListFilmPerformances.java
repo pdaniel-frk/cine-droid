@@ -54,6 +54,8 @@ import android.widget.TextView;
  */
 public class ListFilmPerformances extends ListActivity {
 
+	private final static String TAG = ListFilmPerformances.class.getName();
+
 	public final static String CINEMA_ID = "cinema_id";
 	public final static String FILM_EDI = "film_edi";
 	public final static String FILM_TITLE = "film_title";
@@ -95,7 +97,7 @@ public class ListFilmPerformances extends ListActivity {
 
 	public void onPerformanceRecieved(final FilmDate date) {
 		this.requestCount--;
-		Log.d("org.cineworld", String.format("Data recieved for %s : %s", date.getDate(), date.getPerformances().toString()));
+		Log.d(TAG, String.format("Data recieved for %s : %s", date.getDate(), date.getPerformances().toString()));
 		if (date.getPerformances().size() > 0) {
 			this.cinemaPerformanceAdapter.addDate(date);
 		}

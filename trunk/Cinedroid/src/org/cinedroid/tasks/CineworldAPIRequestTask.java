@@ -34,6 +34,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.cinedroid.activities.ListFilmPerformances;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,6 +54,7 @@ import android.util.Log;
  */
 public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTaskWithCallback<NameValuePair, Progress, List<Result>> {
 
+	private final static String TAG = ListFilmPerformances.class.getName();
 	private final String apiKey;
 
 	/**
@@ -78,7 +80,7 @@ public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTas
 		try {
 			URI uri = URIUtils.createURI("http", "www.cineworld.co.uk/api/quickbook", -1, getMethod(),
 					URLEncodedUtils.format(requestParams, "UTF-8"), null);
-			Log.d("org.cineworld", uri.toString());
+			Log.d(TAG, uri.toString());
 			JSONArray results = sendRequest(new DefaultHttpClient(), uri);
 			List<Result> processedResults = new ArrayList<Result>(results.length());
 			try {
@@ -93,12 +95,12 @@ public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTas
 				return processedResults;
 			}
 			catch (JSONException e) {
-				Log.e("org.cineworld", "Unable to process response from Cineworld web api", e);
+				Log.e(TAG, "Unable to process response from Cineworld web api", e);
 			}
 
 		}
 		catch (URISyntaxException e) {
-			Log.e("org.cineworld", "Unable to create Cineworld web api request URL", e);
+			Log.e(TAG, "Unable to create Cineworld web api request URL", e);
 		}
 		return null;
 	}
@@ -139,31 +141,31 @@ public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTas
 		try {
 			HttpResponse response = httpClient.execute(request);
 			if (response.getStatusLine().getStatusCode() != HttpsURLConnection.HTTP_OK) {
-				Log.e("org.cineworld", String.format("None HTTP OK response from Cineworld web api %d:%s", response.getStatusLine()
-						.getStatusCode(), response.getStatusLine().getReasonPhrase()));
+				Log.e(TAG, String.format("None HTTP OK response from Cineworld web api %d:%s", response.getStatusLine().getStatusCode(),
+						response.getStatusLine().getReasonPhrase()));
 			}
 			try {
 				String responseBody = EntityUtils.toString(response.getEntity());
-				Log.i("org.cineworld", responseBody);
+				Log.i(TAG, responseBody);
 				try {
 					JSONObject responseJSON = new JSONObject(responseBody);
 					return responseJSON.getJSONArray(getArrayKey());
 				}
 				catch (JSONException e) {
-					Log.e("org.cineworld", String.format("Unable to process response from Cineworld web api : %s", responseBody), e);
+					Log.e(TAG, String.format("Unable to process response from Cineworld web api : %s", responseBody), e);
 				}
 
 			}
 			catch (IOException e) {
-				Log.e("org.cineworld", "Unable to process response from Cineworld web api", e);
+				Log.e(TAG, "Unable to process response from Cineworld web api", e);
 			}
 
 		}
 		catch (ClientProtocolException e) {
-			Log.e("org.cineworld", "Unable to process request to Cineworld web api", e);
+			Log.e(TAG, "Unable to process request to Cineworld web api", e);
 		}
 		catch (IOException e) {
-			Log.e("org.cineworld", "Unable to process request to Cineworld web api", e);
+			Log.e(TAG, "Unable to process request to Cineworld web api", e);
 		}
 
 		return null;
