@@ -25,7 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 /**
  * @author Kingamajick
  * 
@@ -39,9 +38,10 @@ public class RetrieveFilmsTask extends CineworldAPIRequestTask<Void, Film> {
 
 	/**
 	 * @param callback
+	 * @param apiKey
 	 */
-	public RetrieveFilmsTask(final ActivityCallback callback) {
-		super(callback);
+	public RetrieveFilmsTask(final ActivityCallback callback, final String apiKey) {
+		super(callback, apiKey);
 	}
 
 	/*

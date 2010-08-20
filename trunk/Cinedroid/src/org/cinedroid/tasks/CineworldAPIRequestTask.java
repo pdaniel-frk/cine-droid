@@ -53,11 +53,15 @@ import android.util.Log;
  */
 public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTaskWithCallback<NameValuePair, Progress, List<Result>> {
 
+	private final String apiKey;
+
 	/**
 	 * @param callback
+	 * @param apiKey
 	 */
-	public CineworldAPIRequestTask(final ActivityCallback callback) {
+	public CineworldAPIRequestTask(final ActivityCallback callback, final String apiKey) {
 		super(callback);
+		this.apiKey = apiKey;
 	}
 
 	/*
@@ -69,7 +73,7 @@ public abstract class CineworldAPIRequestTask<Progress, Result> extends AsyncTas
 	protected List<Result> doInBackground(final NameValuePair... params) {
 		List<NameValuePair> requestParams = new ArrayList<NameValuePair>(params.length + 1);
 		requestParams.addAll(Arrays.asList(params));
-		requestParams.add(new BasicNameValuePair("key", "9M42KyzC"));
+		requestParams.add(new BasicNameValuePair("key", this.apiKey));
 		addAdditionalParams(requestParams);
 		try {
 			URI uri = URIUtils.createURI("http", "www.cineworld.co.uk/api/quickbook", -1, getMethod(),

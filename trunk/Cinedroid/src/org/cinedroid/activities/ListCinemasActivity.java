@@ -87,7 +87,7 @@ public class ListCinemasActivity extends ListActivity {
 
 		ActivityCallback retrieveCinemasTaskCallback = AsyncTaskWithCallback.createCallback(this, "onRetrieveCinemasTaskFinished",
 				List.class);
-		new RetrieveCinemasTask(retrieveCinemasTaskCallback).execute();
+		new RetrieveCinemasTask(retrieveCinemasTaskCallback, getString(R.string.cineworld_api_key)).execute();
 
 		this.progressDialog = ProgressDialog.show(this, "", "Retrieving cinemas, please wait...", false);
 	}

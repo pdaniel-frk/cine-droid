@@ -85,7 +85,7 @@ public class ListFilmsActivity extends ListActivity {
 		setListAdapter(this.filmAdapter);
 
 		ActivityCallback retrieveFilmTaskCallback = AsyncTaskWithCallback.createCallback(this, "onRetrieveFilmTaskFinished", List.class);
-		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(retrieveFilmTaskCallback);
+		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(retrieveFilmTaskCallback, getString(R.string.cineworld_api_key));
 		if (getIntent().hasExtra(CINEMA_ID)) {
 			NameValuePair cinemaId = new BasicNameValuePair(RetrieveFilmsTask.CINEMA_PARAM_KEY, Integer.toString(getIntent().getExtras()
 					.getInt(CINEMA_ID)));
