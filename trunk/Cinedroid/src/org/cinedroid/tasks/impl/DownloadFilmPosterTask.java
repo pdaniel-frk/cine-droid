@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.cinedroid.tasks.AsyncTaskWithCallback;
+import org.cinedroid.tasks.handler.ActivityCallback;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -35,8 +36,8 @@ public class DownloadFilmPosterTask extends AsyncTaskWithCallback<String, Void, 
 	/**
 	 * @param callback
 	 */
-	public DownloadFilmPosterTask(final org.cinedroid.tasks.AsyncTaskWithCallback.ActivityCallback callback) {
-		super(callback);
+	public DownloadFilmPosterTask(final ActivityCallback callback, final int ref) {
+		super(callback, ref);
 	}
 
 	/*

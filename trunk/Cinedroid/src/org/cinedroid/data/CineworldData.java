@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cinedroid.activities;
+package org.cinedroid.data;
 
-import android.content.Intent;
+import org.json.JSONException;
 
 /**
  * @author Kingamajick
  * 
  */
-public class ActivityUtils {
-
-	private final static String ERR_EXTRA_NOT_FOUND = "Extra '%s' not found";
+public interface CineworldData {
 
 	/**
-	 * Checks a given intent has the specified extras and throw an {@link IllegalArgumentException} if not.
+	 * Implementations of this method should use it to populate themselves from their json representation.
 	 * 
-	 * @param intent
-	 * @param extras
+	 * @param jsonString
+	 * @return
+	 * @throws JSONException
 	 */
-	final static void checkExtras(final Intent intent, final String... extras) {
-		for (String extra : extras) {
-			if (!intent.hasExtra(extra)) {
-				throw new IllegalArgumentException(String.format(ActivityUtils.ERR_EXTRA_NOT_FOUND, extra));
-			}
-		}
-	}
-
+	public void fromJSON(final String jsonString) throws JSONException;
 }

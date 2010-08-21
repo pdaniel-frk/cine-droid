@@ -13,37 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cinedroid.tasks.impl;
-
-import org.cinedroid.tasks.AsyncTaskWithCallback;
-
-import android.location.Location;
-import android.location.LocationManager;
+package org.cinedroid.tasks;
 
 /**
+ * This interface should be implemented by tasks which may be required to be rerun at a later time (for example the http request failed). It
+ * is up to the implementor to supply the correct constructor arguments, as well as the params to execute. The {@link #resurrect()} method
+ * <b>MUST</b> be called from the UI thread.
+ * 
  * @author Kingamajick
  * 
  */
-public class GetLocationTask extends AsyncTaskWithCallback<LocationManager, Void, Location> {
+public interface ResurrectableTask {
 
 	/**
-	 * @param callback
+	 * Resurrect the task and rerun!
 	 */
-	public GetLocationTask(final ActivityCallback callback) {
-		super(callback);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.os.AsyncTask#doInBackground(Params[])
-	 */
-	@Override
-	protected Location doInBackground(final LocationManager... params) {
-		Location l = new Location("");
-		l.setLatitude(53.381662);
-		l.setLongitude(-1.500465);
-
-		return l;
-	}
+	public void resurrect();
 }

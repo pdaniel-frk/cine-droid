@@ -15,72 +15,57 @@
  */
 package org.cinedroid.tasks.impl;
 
-import java.util.List;
+import org.cinedroid.data.impl.FilmDate;
+import org.cinedroid.tasks.AbstractCineworldTask;
+import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.util.CineworldAPIAssistant.API_METHOD;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.cinedroid.data.FilmDate;
-import org.cinedroid.tasks.CineworldAPIRequestTask;
-import org.json.JSONArray;
-import org.json.JSONException;
+import android.content.Context;
 
 /**
- * @author Kingamajick
+ * Retrieves a list of dates from the Cineworld API.
  * 
+ * @author Kingamajick
  */
-public class RetrieveDatesTask extends CineworldAPIRequestTask<Void, FilmDate> {
-
-	/**
-	 * The id of the cinema to filter by.
-	 */
-	public final static String CINEMA_PARAM_KEY = "cinema";
-	/**
-	 * The EDI of the film to filter by.
-	 */
-	public final static String FILM_PARAM_KEY = "film";
+public class RetrieveDatesTask extends AbstractCineworldTask<Void, FilmDate> {
 
 	/**
 	 * @param callback
-	 * @param apiKey
+	 * @param ref
+	 * @param context
 	 */
-	public RetrieveDatesTask(final ActivityCallback callback, final String apiKey) {
-		super(callback, apiKey);
+	public RetrieveDatesTask(final ActivityCallback callback, final int ref, final Context context) {
+		super(callback, ref, context);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#getMethod()
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getTaskDetails()
 	 */
 	@Override
-	protected String getMethod() {
-		return "dates";
+	protected String getTaskDetails() {
+		return "Retrieving performance dates, please wait...";
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#process(org.json.JSONArray, int)
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getApiMethod()
 	 */
 	@Override
-	protected FilmDate process(final JSONArray jsonArray, final int index) throws JSONException {
-
-		String date = jsonArray.getString(index);
-		FilmDate filmDate = new FilmDate();
-		filmDate.setDate(date);
-
-		return filmDate;
+	protected API_METHOD getApiMethod() {
+		return API_METHOD.DATES;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#addAdditionalParams(java.util.List)
+	 * @see org.cinedroid.tasks.ResurrectableTask#resurrect()
 	 */
 	@Override
-	protected void addAdditionalParams(final List<NameValuePair> params) {
-		NameValuePair full = new BasicNameValuePair("full", "true");
-		params.add(full);
+	public void resurrect() {
+		RetrieveDatesTask zombie = new RetrieveDatesTask(this.completionCallback, this.taskReference, this.context);
+		zombie.execute(this.params);
 	}
-
 }

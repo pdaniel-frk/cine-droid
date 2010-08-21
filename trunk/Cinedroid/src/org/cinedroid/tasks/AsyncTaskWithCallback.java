@@ -15,84 +15,101 @@
  */
 package org.cinedroid.tasks;
 
-import java.lang.reflect.Method;
+import org.cinedroid.tasks.handler.ActivityCallback;
 
-import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
 
 /**
  * @author Kingamajick
  * 
  */
 public abstract class AsyncTaskWithCallback<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
-	private final static String TAG = AsyncTaskWithCallback.class.getName();
-	protected final ActivityCallback callback;
 
 	/**
-	 * Helper call to store a references to an {@link Activity} and its callback {@link Method}.
+	 * Code returned by {@link AsyncTaskWithCallback#getError()} if the task executed successfully.
 	 */
-	public final static class ActivityCallback {
-		public final Activity receiver;
-		public final Method callback;
-
-		public ActivityCallback(final Activity receiver, final Method callback) {
-			this.receiver = receiver;
-			this.callback = callback;
-		}
-
-		/**
-		 * Attempts to invoke the callback method with the given args. If this is not possible the error is logged.
-		 * 
-		 * @param args
-		 */
-		public void invoke(final Object... args) {
-			try {
-				this.callback.invoke(this.receiver, args);
-
-			}
-			catch (Exception e) {
-				Log.e(TAG, String.format("Callback %s failed on %s", this.callback.getName(), this.receiver.getClass().getName()), e);
-			}
-		}
-	}
-
+	public final static int SUCCESS = -1;
 	/**
-	 * Utility method to retrieve a reference to the callback method on a {@link Activity} which will act as the receiver. If a callback
-	 * can't be created, this method will return null and log an error message.
-	 * 
-	 * @param reciever
-	 * @param methodName
-	 * @param paramtypes
-	 * @return
+	 * Callback for task completion.
 	 */
-	public static ActivityCallback createCallback(final Activity reciever, final String methodName, final Class<?>... paramtypes) {
-		try {
-			ActivityCallback callback = new ActivityCallback(reciever, reciever.getClass().getMethod(methodName, paramtypes));
-			return callback;
-		}
-		catch (Exception e) {
-			Log.e(TAG, String.format("Unable to create callback function %s#%s", reciever.getClass().getName(), methodName), e);
-		}
-		return null;
-	}
+	protected final ActivityCallback completionCallback;
+	/**
+	 * Tasks reference.
+	 */
+	protected final int taskReference;
+	/**
+	 * Should return a defined code for an error occurring in this task
+	 */
+	private int errorCode = -1;
+	/**
+	 * Result of the task if any;
+	 */
+	private Result result;
 
 	/**
-	 * Creates a {@link AsyncTask} which will call the {@link Method} callback on a given {@link Activity} in its
-	 * {@link #onPostExecute(Object)} method. The callback method should receive a single argument of the Result type.
+	 * Creates and instance of {@link AsyncTaskWithCallback} which on completion will call the
+	 * {@link ActivityCallback#handleCallback(AsyncTaskWithCallback, int)} with the given reference. The reference must be <code>>= 0</code>
+	 * or {@link ActivityCallback#NO_REF}.
 	 * 
-	 * @param activity
 	 * @param callback
+	 *            a non <code>null</code> implementor of {@link ActivityCallback}.
+	 * @param ref
+	 *            where <code>ref >= 0</code>
 	 */
-	public AsyncTaskWithCallback(final ActivityCallback callback) {
-		this.callback = callback;
+	public AsyncTaskWithCallback(final ActivityCallback callback, final int ref) {
+		if (callback == null) {
+			throw new IllegalArgumentException("callback cannot be null");
+		}
+		if (ref != ActivityCallback.NO_REF && ref < 0) {
+			throw new IllegalArgumentException("ref must either be ActivityCallback.NO_REF or >= 0");
+		}
+		this.completionCallback = callback;
+		this.taskReference = ref;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+	 */
 	@Override
 	protected void onPostExecute(final Result result) {
-		if (this.callback == null) {
-			return;
-		}
-		this.callback.invoke(result);
+		this.result = result;
+		this.completionCallback.handleCallback(this, this.taskReference);
+	};
+
+	/**
+	 * @return the reference this task was created with.
+	 */
+	public final int getRef() {
+		return this.taskReference;
 	}
+
+	/**
+	 * @return the result of the task, may be null if the task failed or has no result
+	 */
+	public final Result getResult() {
+		return this.result;
+	}
+
+	/**
+	 * This method should be called if an error has occurred during the execution of the task, which has cause the results (if any) to be
+	 * invalid.
+	 * 
+	 * @param errorMessage
+	 */
+	protected final void setError(final int errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * If an error occurred during the execution of this task, this method will return a user readable {@link String}, if no error has
+	 * occurred, this method will return {@link #SUCCESS}
+	 * 
+	 * @return
+	 */
+	public final int getError() {
+		return this.errorCode;
+	}
+
 }

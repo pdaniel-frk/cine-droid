@@ -17,27 +17,28 @@ package org.cinedroid.activities;
 
 import java.util.List;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.CinemaPerformanceAdapter;
-import org.cinedroid.data.FilmDate;
-import org.cinedroid.data.FilmPerformance;
+import org.cinedroid.data.impl.FilmDate;
+import org.cinedroid.data.impl.FilmPerformance;
+import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
-import org.cinedroid.tasks.AsyncTaskWithCallback.ActivityCallback;
+import org.cinedroid.tasks.handler.ActivityCallback;
 import org.cinedroid.tasks.impl.DownloadFilmPosterTask;
+import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import org.cinedroid.tasks.impl.RetrieveDatesTask;
 import org.cinedroid.tasks.impl.RetrievePerformancesTask;
+import org.cinedroid.util.ActivityUtils;
+import org.cinedroid.util.CineworldAPIAssistant;
 
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,7 @@ import android.widget.TextView;
  * @author Kingamajick
  * 
  */
-public class ListFilmPerformances extends ListActivity {
+public class ListFilmPerformances extends ListActivity implements ActivityCallback {
 
 	private final static String TAG = ListFilmPerformances.class.getName();
 
@@ -64,11 +65,16 @@ public class ListFilmPerformances extends ListActivity {
 	public final static String RATING = "rating";
 	public final static String ADVISORY = "advisory";
 
+	private final static int IMAGE_DOWNLOADED = 0;
+	private final static int DATES_RETRIEVED = 1;
+	private final static int PERFORMANCES_RETRIEVED = 2;
+
 	private CinemaPerformanceAdapter cinemaPerformanceAdapter;
 	private BasicNameValuePair cinemaId;
 	private BasicNameValuePair filmEdi;
-	private ProgressDialog progressDialog;
-	private int requestCount = 0;
+	private BasicNameValuePair key;
+	private String posterURL;
+
 	private View contentView;
 
 	/**
@@ -86,25 +92,16 @@ public class ListFilmPerformances extends ListActivity {
 	}
 
 	public void onDatesRetrieved(final List<FilmDate> filmDates) {
-		ActivityCallback onPerformanceRecieved = AsyncTaskWithCallback.createCallback(this, "onPerformanceRecieved", FilmDate.class);
-		this.requestCount = filmDates.size();
-		for (FilmDate filmDate : filmDates) {
-			NameValuePair date = new BasicNameValuePair(RetrievePerformancesTask.DATE_PARAM_KEY, filmDate.getDate());
-			new RetrievePerformancesTask(onPerformanceRecieved, getString(R.string.cineworld_api_key), filmDate).execute(this.cinemaId,
-					this.filmEdi, date);
-		}
+		RetrievePerformancesTask retrievePerformancesTask = new RetrievePerformancesTask(this, PERFORMANCES_RETRIEVED, this,
+				filmDates.toArray(new FilmDate[filmDates.size()]));
+		retrievePerformancesTask.execute(this.cinemaId, this.filmEdi, this.key);
 	}
 
-	public void onPerformanceRecieved(final FilmDate date) {
-		this.requestCount--;
-		Log.d(TAG, String.format("Data recieved for %s : %s", date.getDate(), date.getPerformances().toString()));
-		if (date.getPerformances().size() > 0) {
-			this.cinemaPerformanceAdapter.addDate(date);
-		}
-		// Cancel once all the performances have been retrieved.
-		if (this.requestCount == 0) {
-			this.progressDialog.cancel();
-		}
+	public void onPerformanceRecieved(final List<FilmDate> filmDates) {
+
+		this.cinemaPerformanceAdapter.addDates(filmDates);
+
+		this.cinemaPerformanceAdapter.notifyDataSetChanged();
 	}
 
 	private final static int[] PERFORMANCE_TIME_VIEW_IDS = new int[] { R.id.PerformanceTime0, R.id.PerformanceTime1, R.id.PerformanceTime2 };
@@ -253,17 +250,52 @@ public class ListFilmPerformances extends ListActivity {
 			}
 		});
 
-		ActivityCallback downloadFilmPosterCallback = AsyncTaskWithCallback.createCallback(this, "onImageDownloaded", Bitmap.class);
-		new DownloadFilmPosterTask(downloadFilmPosterCallback).execute(extras.getString(POSTER_URL));
+		this.cinemaId = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(getIntent().getExtras().getInt(CINEMA_ID)));
+		this.filmEdi = new BasicNameValuePair(CineworldAPIAssistant.FILM, Integer.toString(getIntent().getExtras().getInt(FILM_EDI)));
+		this.key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
+		this.posterURL = extras.getString(POSTER_URL);
+		new DownloadFilmPosterTask(this, IMAGE_DOWNLOADED).execute(this.posterURL);
+		new RetrieveDatesTask(this, DATES_RETRIEVED, this).execute(this.cinemaId, this.filmEdi, this.key);
+	}
 
-		ActivityCallback onDatesRetrievedCallback = AsyncTaskWithCallback.createCallback(this, "onDatesRetrieved", List.class);
-		this.cinemaId = new BasicNameValuePair(RetrieveDatesTask.CINEMA_PARAM_KEY, Integer.toString(getIntent().getExtras().getInt(
-				CINEMA_ID)));
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.handler.ActivityCallback#handleCallback(org.cinedroid.tasks.AsyncTaskWithCallback, int)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public synchronized void handleCallback(final AsyncTaskWithCallback task, final int ref) {
+		if (task.getError() == AsyncTaskWithCallback.SUCCESS) {
+			switch (task.getRef()) {
+			case IMAGE_DOWNLOADED:
+				if (task instanceof DownloadFilmPosterTask) {
+					onImageDownloaded(((DownloadFilmPosterTask) task).getResult());
+				}
+				break;
+			case DATES_RETRIEVED:
+				if (task instanceof RetrieveDatesTask) {
+					onDatesRetrieved(((RetrieveDatesTask) task).getResult());
+				}
+				break;
+			case PERFORMANCES_RETRIEVED:
+				if (task instanceof RetrievePerformancesTask) {
+					onPerformanceRecieved(((RetrievePerformancesTask) task).getResult());
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			if (task instanceof RetrieveCinemasTask) {
+				final AbstractCineworldTask cineworldTask = (AbstractCineworldTask) task;
+				CineworldAPIAssistant.createCineworldAPIErrorDialog(this, cineworldTask);
+			}
+			else {
+				throw new IllegalArgumentException(String.format("Unexpected type %s", task.getClass().getName()));
+			}
+		}
 
-		this.filmEdi = new BasicNameValuePair(RetrievePerformancesTask.FILM_PARAM_KEY, Integer.toString(getIntent().getExtras().getInt(
-				FILM_EDI)));
-		new RetrieveDatesTask(onDatesRetrievedCallback, getString(R.string.cineworld_api_key)).execute(this.cinemaId);
-
-		this.progressDialog = ProgressDialog.show(this, "", "Retrieving performances, please wait...", false);
 	}
 }

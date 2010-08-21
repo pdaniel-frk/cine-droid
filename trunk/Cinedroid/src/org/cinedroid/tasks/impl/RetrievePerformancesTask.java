@@ -15,93 +15,84 @@
  */
 package org.cinedroid.tasks.impl;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cinedroid.data.FilmDate;
-import org.cinedroid.data.FilmPerformance;
-import org.cinedroid.tasks.CineworldAPIRequestTask;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apache.http.NameValuePair;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.cinedroid.data.impl.FilmDate;
+import org.cinedroid.data.impl.FilmPerformance;
+import org.cinedroid.tasks.AbstractCineworldTask;
+import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.util.CineworldAPIAssistant;
+import org.cinedroid.util.CineworldAPIAssistant.API_METHOD;
+import org.cinedroid.util.CineworldAPIAssistant.CineworldAPIException;
 
+import android.content.Context;
 import android.text.format.Time;
 import android.util.Log;
 
 /**
- * This class retrieves the performances for a given cinema, film and date.
+ * This class retrieves the performances for dates supplied via the constuctor.
  * 
  * @author Kingamajick
  * 
  */
-public class RetrievePerformancesTask extends CineworldAPIRequestTask<Void, FilmPerformance> {
-	private final static String TAG = RetrievePerformancesTask.class.getName();
+public class RetrievePerformancesTask extends AbstractCineworldTask<Void, FilmDate> {
+	private final static String TAG = "cinedroid:" + RetrievePerformancesTask.class.getSimpleName();
+	public final static int UNABLE_TO_CONTACT_CINEWORLD_API = 0;
+	public final static int UNABLE_TO_PROCESS_RESPONSE = 1;
+
 	/**
-	 * The id of the cinema to filter by.
+	 * Film dates to find performances for.
 	 */
-	public final static String CINEMA_PARAM_KEY = "cinema";
-	/**
-	 * The EDI of the film to filter by.
-	 */
-	public final static String FILM_PARAM_KEY = "film";
-	/**
-	 * The date of the performance to filter by.
-	 */
-	public final static String DATE_PARAM_KEY = "date";
-	private FilmDate date;
+	protected final FilmDate[] dates;
 
 	/**
 	 * The {@link ActivityCallback} method should take two param's, the first been the {@link FilmDate} this
 	 * {@link RetrievePerformancesTask} was created with and the second been a {@link List} or {@link FilmPerformance}s.
 	 * 
 	 * @param callback
+	 * @param ref
+	 * @param context
 	 */
-	public RetrievePerformancesTask(final ActivityCallback callback, final String apiKey, final FilmDate date) {
-		super(callback, apiKey);
-		this.date = date;
+	public RetrievePerformancesTask(final ActivityCallback callback, final int ref, final Context context, final FilmDate... dates) {
+		super(callback, ref, context);
+		this.dates = dates;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#getMethod()
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#doInBackground(org.apache.http.NameValuePair[])
 	 */
 	@Override
-	protected String getMethod() {
-		return "performances";
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#process(org.json.JSONArray, int)
-	 */
-	@Override
-	protected FilmPerformance process(final JSONArray jsonArray, final int index) throws JSONException {
-		JSONObject jsonObject = jsonArray.getJSONObject(index);
-		FilmPerformance performance = new FilmPerformance();
-		performance.setTime(jsonObject.getString("time"));
-		performance.setAvailable(jsonObject.getBoolean("available"));
-		performance.setType(jsonObject.getString("type"));
-		performance.setBookingUrl(jsonObject.getString("booking_url"));
-
-		return performance;
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cineworld.tasks.AsyncTaskWithCallback#onPostExecute(java.lang.Object)
-	 */
-	@Override
-	protected void onPostExecute(final List<FilmPerformance> result) {
-		if (this.callback == null) {
-			return;
+	protected List<FilmDate> doInBackground(final NameValuePair... params) {
+		CineworldAPIAssistant assistance = new CineworldAPIAssistant();
+		// Add extra item at end of params for dates
+		NameValuePair[] paramsWithDate = new NameValuePair[params.length + 1];
+		for (int i = 0; i < params.length; i++) {
+			paramsWithDate[i] = params[i];
 		}
-		this.date.setPerformances(result);
-		filterPastDates(this.date);
-		this.callback.invoke(this.date);
+		for (FilmDate date : this.dates) {
+			NameValuePair dateNVP = new BasicNameValuePair(CineworldAPIAssistant.DATE, date.getDate());
+			paramsWithDate[params.length] = dateNVP;
+			String response;
+			try {
+				response = assistance.sendRequest(new DefaultHttpClient(), API_METHOD.PERFORMANCES, paramsWithDate);
+				List<FilmPerformance> performances = assistance.process(response, API_METHOD.PERFORMANCES);
+				date.setPerformances(performances);
+				filterPastDates(date);
+			}
+			catch (CineworldAPIException e) {
+				setError(UNABLE_TO_QUERY_CINEWORLD_API);
+				Log.e(TAG, e.getMessage(), e);
+				return null;
+			}
+		}
+		return Arrays.asList(this.dates);
 
 	}
 
@@ -133,5 +124,39 @@ public class RetrievePerformancesTask extends CineworldAPIRequestTask<Void, Film
 			}
 		}
 		Log.d(TAG, String.format("Current Time %s", currentTime.toString()));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getTaskDetails()
+	 */
+	@Override
+	protected String getTaskDetails() {
+		return "Retrieving film performance times, please wait...";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getApiMethod()
+	 */
+	@Override
+	protected API_METHOD getApiMethod() {
+		// Blank implementation as performTask has been overridden.
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.ResurrectableTask#resurrect()
+	 */
+	@Override
+	public void resurrect() {
+		RetrievePerformancesTask zombie = new RetrievePerformancesTask(this.completionCallback, this.taskReference, this.context,
+				this.dates);
+		zombie.execute(this.params);
+
 	}
 }
