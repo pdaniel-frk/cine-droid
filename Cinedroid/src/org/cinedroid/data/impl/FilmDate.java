@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cinedroid.data;
+package org.cinedroid.data.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.cinedroid.data.CineworldData;
+import org.json.JSONException;
 
 import android.util.Log;
 
@@ -26,7 +29,7 @@ import android.util.Log;
  * @author Kingamajick
  * 
  */
-public class FilmDate {
+public class FilmDate implements CineworldData {
 	private final static String TAG = FilmDate.class.getName();
 	private String date;
 	private List<FilmPerformance> performances;
@@ -80,5 +83,15 @@ public class FilmDate {
 	@Override
 	public String toString() {
 		return String.format("%s - %s", this.date, this.performances.toString());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.data.CineworldData#fromJSON(java.lang.String)
+	 */
+	@Override
+	public void fromJSON(final String jsonString) throws JSONException {
+		this.date = jsonString;
 	}
 }

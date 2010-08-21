@@ -21,10 +21,13 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.FilmAdapter;
-import org.cinedroid.data.Film;
+import org.cinedroid.data.impl.Film;
+import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
-import org.cinedroid.tasks.AsyncTaskWithCallback.ActivityCallback;
+import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import org.cinedroid.tasks.impl.RetrieveFilmsTask;
+import org.cinedroid.util.CineworldAPIAssistant;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -37,7 +40,7 @@ import android.widget.ListView;
  * @author Kingamajick
  * 
  */
-public class ListFilmsActivity extends ListActivity {
+public class ListFilmsActivity extends ListActivity implements ActivityCallback {
 
 	public final static String CINEMA_ID = "cinema_id";
 
@@ -84,17 +87,45 @@ public class ListFilmsActivity extends ListActivity {
 		this.filmAdapter = new FilmAdapter(this);
 		setListAdapter(this.filmAdapter);
 
-		ActivityCallback retrieveFilmTaskCallback = AsyncTaskWithCallback.createCallback(this, "onRetrieveFilmTaskFinished", List.class);
-		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(retrieveFilmTaskCallback, getString(R.string.cineworld_api_key));
+		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
+		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, "GB");
+		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");
+
+		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(this, ActivityCallback.NO_REF, this);
 		if (getIntent().hasExtra(CINEMA_ID)) {
-			NameValuePair cinemaId = new BasicNameValuePair(RetrieveFilmsTask.CINEMA_PARAM_KEY, Integer.toString(getIntent().getExtras()
-					.getInt(CINEMA_ID)));
-			retrieveFilmsTask.execute(cinemaId);
+			int cinemaID = getIntent().getExtras().getInt(CINEMA_ID);
+			NameValuePair cinema = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, Integer.toString(cinemaID));
+			retrieveFilmsTask.execute(key, territory, full, cinema);
 		}
 		else {
-			retrieveFilmsTask.execute();
+			retrieveFilmsTask.execute(key, territory, full);
 		}
 
 		this.progressDialog = ProgressDialog.show(this, "", "Retrieving films, please wait...", false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.handler.ActivityCallback#handleCallback(org.cinedroid.tasks.AsyncTaskWithCallback, int)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void handleCallback(final AsyncTaskWithCallback task, final int ref) {
+		if (task.getError() == AsyncTaskWithCallback.SUCCESS) {
+			if (task instanceof RetrieveFilmsTask) {
+				onRetrieveFilmTaskFinished(((RetrieveFilmsTask) task).getResult());
+			}
+		}
+		else {
+			if (task instanceof RetrieveCinemasTask) {
+				final AbstractCineworldTask cineworldTask = (AbstractCineworldTask) task;
+				CineworldAPIAssistant.createCineworldAPIErrorDialog(this, cineworldTask);
+			}
+			else {
+				throw new IllegalArgumentException(String.format("Unexpected type %s", task.getClass().getName()));
+			}
+		}
+
 	}
 }

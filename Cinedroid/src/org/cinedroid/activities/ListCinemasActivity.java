@@ -17,15 +17,18 @@ package org.cinedroid.activities;
 
 import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.CinemaLocationAdapter;
-import org.cinedroid.data.CinemaLocation;
+import org.cinedroid.data.impl.Cinema;
+import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
-import org.cinedroid.tasks.AsyncTaskWithCallback.ActivityCallback;
+import org.cinedroid.tasks.handler.ActivityCallback;
 import org.cinedroid.tasks.impl.RetrieveCinemasTask;
+import org.cinedroid.util.CineworldAPIAssistant;
 
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -36,24 +39,22 @@ import android.widget.ListView;
  * @author Kingamajick
  * 
  */
-public class ListCinemasActivity extends ListActivity {
+public class ListCinemasActivity extends ListActivity implements ActivityCallback {
 
 	public static final String SORT_TYPE = "sort_type";
 	public static final int SORT_ALPHA = 0;
 	public static final int SORT_NEAREST = 1;
 
-	ArrayAdapter<CinemaLocation> cinemaLocationAdapter;
-	private ProgressDialog progressDialog;
+	ArrayAdapter<Cinema> cinemaLocationAdapter;
 
 	/**
 	 * @param results
 	 */
-	public void onRetrieveCinemasTaskFinished(final List<CinemaLocation> results) {
-		for (CinemaLocation location : results) {
+	public void onRetrieveCinemasTaskFinished(final List<Cinema> results) {
+		for (Cinema location : results) {
 			this.cinemaLocationAdapter.add(location);
 		}
 		this.cinemaLocationAdapter.notifyDataSetChanged();
-		this.progressDialog.cancel();
 	}
 
 	/*
@@ -64,7 +65,7 @@ public class ListCinemasActivity extends ListActivity {
 	@Override
 	protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
 		super.onListItemClick(l, v, position, id);
-		CinemaLocation cinemaLocation = this.cinemaLocationAdapter.getItem(position);
+		Cinema cinemaLocation = this.cinemaLocationAdapter.getItem(position);
 
 		Intent viewFilmsIntent = new Intent(this, ListFilmsActivity.class);
 		viewFilmsIntent.putExtra(ListFilmsActivity.CINEMA_ID, cinemaLocation.getId());
@@ -85,10 +86,34 @@ public class ListCinemasActivity extends ListActivity {
 		this.cinemaLocationAdapter = new CinemaLocationAdapter(this, R.layout.cinema_list_item, R.id.CinemaName);
 		setListAdapter(this.cinemaLocationAdapter);
 
-		ActivityCallback retrieveCinemasTaskCallback = AsyncTaskWithCallback.createCallback(this, "onRetrieveCinemasTaskFinished",
-				List.class);
-		new RetrieveCinemasTask(retrieveCinemasTaskCallback, getString(R.string.cineworld_api_key)).execute();
+		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, "GB");
+		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");
+		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
+		new RetrieveCinemasTask(this, ActivityCallback.NO_REF, this).execute(territory, full, key);
 
-		this.progressDialog = ProgressDialog.show(this, "", "Retrieving cinemas, please wait...", false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.handler.ActivityCallback#handleCallback(org.cinedroid.tasks.AsyncTaskWithCallback, int)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void handleCallback(final AsyncTaskWithCallback task, final int ref) {
+		if (task.getError() == AsyncTaskWithCallback.SUCCESS) {
+			if (task instanceof RetrieveCinemasTask) {
+				onRetrieveCinemasTaskFinished(((RetrieveCinemasTask) task).getResult());
+			}
+		}
+		else {
+			if (task instanceof RetrieveCinemasTask) {
+				final AbstractCineworldTask cineworldTask = (AbstractCineworldTask) task;
+				CineworldAPIAssistant.createCineworldAPIErrorDialog(this, cineworldTask);
+			}
+			else {
+				throw new IllegalArgumentException(String.format("Unexpected type %s", task.getClass().getName()));
+			}
+		}
 	}
 }

@@ -21,8 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.cinedroid.R;
-import org.cinedroid.data.FilmDate;
-import org.cinedroid.data.FilmPerformance;
+import org.cinedroid.data.impl.FilmDate;
+import org.cinedroid.data.impl.FilmPerformance;
 
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
@@ -87,8 +87,8 @@ public class CinemaPerformanceAdapter extends BaseAdapter {
 		// this.zoomIn = AnimationUtils.loadAnimation(this.context, R.anim.zoom_in);
 	}
 
-	public void addDate(final FilmDate filmDate) {
-		this.filmDates.add(filmDate);
+	public void addDates(final List<FilmDate> filmDate) {
+		this.filmDates.addAll(filmDate);
 		Collections.sort(this.filmDates, FILM_DATE_COMPARATOR);
 		notifyDataSetChanged();
 	}
@@ -217,4 +217,5 @@ public class CinemaPerformanceAdapter extends BaseAdapter {
 	public long getItemId(final int position) {
 		return position;
 	}
+
 }

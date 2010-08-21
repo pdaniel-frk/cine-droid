@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cinedroid.data;
+package org.cinedroid.data.impl;
+
+import org.cinedroid.data.CineworldData;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Kingamajick
  * 
  */
-public class CinemaLocation {
+public class Cinema implements CineworldData {
 
 	protected int id;
 	protected String name;
@@ -136,5 +140,22 @@ public class CinemaLocation {
 	@Override
 	public String toString() {
 		return String.format("%s - %s", this.name, this.postcode);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.data.CineworldData#fromJSON(java.lang.String)
+	 */
+	@Override
+	public void fromJSON(final String jsonString) throws JSONException {
+		JSONObject json = new JSONObject(jsonString);
+		this.id = json.getInt("id");
+		this.name = json.getString("name");
+		this.url = json.getString("cinema_url");
+		this.address = json.getString("address");
+		this.postcode = json.getString("postcode");
+		this.phone = json.getString("telephone");
+
 	}
 }

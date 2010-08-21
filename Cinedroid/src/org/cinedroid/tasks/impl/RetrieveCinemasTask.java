@@ -15,72 +15,58 @@
  */
 package org.cinedroid.tasks.impl;
 
-import java.util.List;
+import org.cinedroid.data.impl.Cinema;
+import org.cinedroid.tasks.AbstractCineworldTask;
+import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.util.CineworldAPIAssistant.API_METHOD;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.cinedroid.data.CinemaLocation;
-import org.cinedroid.tasks.AsyncTaskWithCallback;
-import org.cinedroid.tasks.CineworldAPIRequestTask;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.content.Context;
 
 /**
- * @author Kingamajick
+ * Retrieves a list of cinemas from the Cineworld API.
  * 
- *         This implementation of {@link AsyncTaskWithCallback} is used to retrieve a list of cinemas from the Cineworld web api. The
- *         cinemas retrieved will be passed to the callback method.
+ * @author Kingamajick
  */
-public class RetrieveCinemasTask extends CineworldAPIRequestTask<Void, CinemaLocation> {
+public class RetrieveCinemasTask extends AbstractCineworldTask<Void, Cinema> {
 
 	/**
 	 * @param callback
-	 * @param apiKey
+	 * @param ref
+	 * @param context
 	 */
-	public RetrieveCinemasTask(final ActivityCallback callback, final String apiKey) {
-		super(callback, apiKey);
+	public RetrieveCinemasTask(final ActivityCallback callback, final int ref, final Context context) {
+		super(callback, ref, context);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#getMethod()
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getTaskDetails()
 	 */
 	@Override
-	protected String getMethod() {
-		return "cinemas";
+	protected String getTaskDetails() {
+		return "Retrieving cinemas, please wait...";
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#process(org.json.JSONArray, int)
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getApiMethod()
 	 */
 	@Override
-	protected CinemaLocation process(final JSONArray jsonArray, final int index) throws JSONException {
-		JSONObject jsonObject = jsonArray.getJSONObject(index);
-		CinemaLocation location = new CinemaLocation();
-
-		location.setId(jsonObject.getInt("id"));
-		location.setName(jsonObject.getString("name"));
-		location.setUrl(jsonObject.getString("cinema_url"));
-		location.setAddress(jsonObject.getString("address"));
-		location.setPostcode(jsonObject.getString("postcode"));
-		location.setPhone(jsonObject.getString("telephone"));
-
-		return location;
+	protected API_METHOD getApiMethod() {
+		return API_METHOD.CINEMAS;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#addAdditionalParams(java.util.List)
+	 * @see org.cinedroid.tasks.ResurrectableTask#resurrect()
 	 */
 	@Override
-	protected void addAdditionalParams(final List<NameValuePair> params) {
-		NameValuePair full = new BasicNameValuePair("full", "true");
-		params.add(full);
+	public void resurrect() {
+		RetrieveCinemasTask zombie = new RetrieveCinemasTask(this.completionCallback, this.taskReference, this.context);
+		zombie.execute(this.params);
 	}
 
 }

@@ -15,80 +15,56 @@
  */
 package org.cinedroid.tasks.impl;
 
-import java.util.List;
+import org.cinedroid.data.impl.Film;
+import org.cinedroid.tasks.AbstractCineworldTask;
+import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.util.CineworldAPIAssistant.API_METHOD;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.cinedroid.data.Film;
-import org.cinedroid.tasks.CineworldAPIRequestTask;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.content.Context;
 
 /**
  * @author Kingamajick
  * 
  */
-public class RetrieveFilmsTask extends CineworldAPIRequestTask<Void, Film> {
-
-	/**
-	 * The id of the cinema to filter by.
-	 */
-	public final static String CINEMA_PARAM_KEY = "cinema";
+public class RetrieveFilmsTask extends AbstractCineworldTask<Void, Film> {
 
 	/**
 	 * @param callback
-	 * @param apiKey
+	 * @param ref
+	 * @param context
 	 */
-	public RetrieveFilmsTask(final ActivityCallback callback, final String apiKey) {
-		super(callback, apiKey);
+	public RetrieveFilmsTask(final ActivityCallback callback, final int ref, final Context context) {
+		super(callback, ref, context);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#getMethod()
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getTaskDetails()
 	 */
 	@Override
-	protected String getMethod() {
-		return "films";
+	protected String getTaskDetails() {
+		return "Retrieving films, please wait...";
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#process(org.json.JSONArray, int)
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#getApiMethod()
 	 */
 	@Override
-	protected Film process(final JSONArray jsonArray, final int index) throws JSONException {
-		JSONObject jsonObject = jsonArray.getJSONObject(index);
-		Film film = new Film();
-		film.setEdi(jsonObject.getInt("edi"));
-		film.setTitle(jsonObject.getString("title"));
-		if (!jsonObject.isNull("classification")) {
-			film.setClassification(jsonObject.getString("classification"));
-		}
-		else {
-			film.setClassification("??");
-		}
-		if (!jsonObject.isNull("advisory")) {
-			film.setAdvisory(jsonObject.getString("advisory"));
-		}
-		film.setPosterUrl(jsonObject.getString("poster_url"));
-		film.setStillUrl(jsonObject.getString("still_url"));
-		film.setFilmUrl(jsonObject.getString("film_url"));
-
-		return film;
+	protected API_METHOD getApiMethod() {
+		return API_METHOD.FILMS;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cineworld.activities.tasks.CineworldAPIRequestTask#addAdditionalParams(java.util.List)
+	 * @see org.cinedroid.tasks.ResurrectableTask#resurrect()
 	 */
 	@Override
-	protected void addAdditionalParams(final List<NameValuePair> params) {
-		NameValuePair full = new BasicNameValuePair("full", "true");
-		params.add(full);
+	public void resurrect() {
+		RetrieveFilmsTask zombie = new RetrieveFilmsTask(this.completionCallback, this.taskReference, this.context);
+		zombie.execute(this.params);
 	}
 }

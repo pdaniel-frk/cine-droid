@@ -18,7 +18,7 @@ package org.cinedroid.adapters;
 import java.util.List;
 
 import org.cinedroid.R;
-import org.cinedroid.data.Film;
+import org.cinedroid.data.impl.Film;
 
 import android.content.Context;
 import android.view.LayoutInflater;

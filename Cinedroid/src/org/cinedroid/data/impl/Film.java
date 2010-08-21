@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cinedroid.data;
+package org.cinedroid.data.impl;
+
+import org.cinedroid.data.CineworldData;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Kingamajick
  * 
  */
-public class Film {
+public class Film implements CineworldData {
 
 	private int edi;
 	private String title;
@@ -60,7 +64,7 @@ public class Film {
 	}
 
 	/**
-	 * @return the classification
+	 * @return the classification, can be null.
 	 */
 	public String getClassification() {
 		return this.classification;
@@ -75,7 +79,7 @@ public class Film {
 	}
 
 	/**
-	 * @return the advisory
+	 * @return the advisory, can be null.
 	 */
 	public String getAdvisory() {
 		return this.advisory;
@@ -142,5 +146,36 @@ public class Film {
 	@Override
 	public String toString() {
 		return String.format("%s - %s", this.title, this.edi);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.data.CineworldData#fromJSON(java.lang.String)
+	 */
+	@Override
+	public void fromJSON(final String jsonString) throws JSONException {
+		JSONObject json = new JSONObject(jsonString);
+		this.edi = json.getInt("edi");
+		this.title = json.getString("title");
+		if (!json.isNull("classification")) {
+			this.classification = json.getString("classification");
+		}
+		else {
+			this.classification = "??";
+		}
+		if (!json.isNull("advisory")) {
+			this.advisory = json.getString("advisory");
+		}
+		if (!json.isNull("poster_url")) {
+			this.posterUrl = json.getString("poster_url");
+		}
+		if (!json.isNull("still_url")) {
+			this.stillUrl = json.getString("still_url");
+		}
+		if (!json.isNull("film_url")) {
+			this.filmUrl = json.getString("film_url");
+		}
+
 	}
 }

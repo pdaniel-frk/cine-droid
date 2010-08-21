@@ -16,7 +16,7 @@
 package org.cinedroid.adapters;
 
 import org.cinedroid.R;
-import org.cinedroid.data.CinemaLocation;
+import org.cinedroid.data.impl.Cinema;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -29,7 +29,7 @@ import android.widget.TextView;
  * @author Kingamajick
  * 
  */
-public class CinemaLocationAdapter extends ArrayAdapter<CinemaLocation> {
+public class CinemaLocationAdapter extends ArrayAdapter<Cinema> {
 	/**
 	 * 
 	 */
@@ -52,7 +52,7 @@ public class CinemaLocationAdapter extends ArrayAdapter<CinemaLocation> {
 			LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = inflater.inflate(R.layout.cinema_list_item, parent, false);
 		}
-		CinemaLocation location = getItem(position);
+		Cinema location = getItem(position);
 		TextView cinemaName = (TextView) v.findViewById(R.id.CinemaName);
 		cinemaName.setText(location.getName());
 		// TextView cinemaDistance = (TextView) v.findViewById(R.id.CinemaLocation);
