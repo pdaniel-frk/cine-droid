@@ -86,6 +86,7 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 
 		this.filmAdapter = new FilmAdapter(this);
 		setListAdapter(this.filmAdapter);
+		getListView().setTextFilterEnabled(true);
 
 		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
 		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");

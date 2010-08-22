@@ -99,6 +99,8 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 		this.cinemaLocationAdapter = new CinemaLocationAdapter(this, R.layout.cinema_list_item, R.id.CinemaName);
 		setListAdapter(this.cinemaLocationAdapter);
 
+		this.getListView().setTextFilterEnabled(true);
+
 		retrieveCinemas();
 
 	}

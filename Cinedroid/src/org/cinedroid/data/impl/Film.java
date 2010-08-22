@@ -145,7 +145,7 @@ public class Film implements CineworldData {
 	 */
 	@Override
 	public String toString() {
-		return String.format("%s - %s", this.title, this.edi);
+		return this.title;
 	}
 
 	/*
