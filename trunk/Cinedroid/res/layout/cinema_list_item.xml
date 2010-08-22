@@ -14,23 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<RelativeLayout
+<TextView
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/CinemaName"
+
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:orientation="horizontal"
 
-	android:padding="6dip">
+	android:layout_centerVertical="true"
+	android:layout_alignParentLeft="true"
 
-	<TextView
-		android:id="@+id/CinemaName"
+	android:padding="6dip"
+	android:textAppearance="?android:attr/textAppearanceMedium" />
 
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
 
-		android:layout_centerVertical="true"
-		android:layout_alignParentLeft="true"
-
-		android:textAppearance="?android:attr/textAppearanceMedium" />
-
-</RelativeLayout>

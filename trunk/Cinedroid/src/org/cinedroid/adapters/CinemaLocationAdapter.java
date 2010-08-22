@@ -52,16 +52,10 @@ public class CinemaLocationAdapter extends ArrayAdapter<Cinema> {
 			LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = inflater.inflate(R.layout.cinema_list_item, parent, false);
 		}
-		Cinema location = getItem(position);
+		Cinema cinema = getItem(position);
 		TextView cinemaName = (TextView) v.findViewById(R.id.CinemaName);
-		cinemaName.setText(location.getName());
-		// TextView cinemaDistance = (TextView) v.findViewById(R.id.CinemaLocation);
-		// if (location.getDist() >= 0) {
-		// cinemaDistance.setText(String.format("%.1f%nmiles", CinemaLocation.distanceFromCood(location, 53.381662, -1.500465)));
-		// }
-		// else {
-		// cinemaDistance.setText("Unknown");
-		// }
+		cinemaName.setText(cinema.getName());
+
 		return v;
 	}
 

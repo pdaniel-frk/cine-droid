@@ -14,26 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-
-	android:orientation="vertical">
-
-	<ViewStub
-		android:id="@+id/CinemaListHeaderStub"
-		android:inflatedId="@+id/CinemaListHeader"
-
-		android:layout="@layout/cinema_list_header"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content" />
-
-
-	<ListView
-		android:id="@android:id/list"
-
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" />
-</LinearLayout>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:color="#000000" />
+    <item android:state_focused="true" android:color="#000000" />
+    <item android:state_pressed="true" android:color="#000000" />
+    <item android:color="#FFFFFF" />
+</selector>
