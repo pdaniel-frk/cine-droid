@@ -16,6 +16,6 @@
 -->
 <resources>
 	<string
-		name="app_name">cinedroid</string>
-		<string name="cineworld_api_key">CINEWORLD_API_KEY</string>
+		name="app_name">Cinedroid</string>
+		<string name="cineworld_api_key">API_KEY</string>
 </resources>
