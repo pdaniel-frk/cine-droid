@@ -30,7 +30,7 @@ import android.util.Log;
  * 
  */
 public class FilmDate implements CineworldData {
-	private final static String TAG = FilmDate.class.getName();
+	private final static String TAG = "cinedroid:" + FilmDate.class.getSimpleName();
 	private String date;
 	private List<FilmPerformance> performances;
 

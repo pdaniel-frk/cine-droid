@@ -32,7 +32,6 @@ import android.widget.TextView;
  * 
  */
 public class FilmAdapter extends ArrayAdapter<Film> {
-	private final static String TAG = FilmAdapter.class.getName();
 	final Context context;
 
 	/**
