@@ -31,7 +31,7 @@ import android.util.Log;
  * 
  */
 public class DownloadFilmPosterTask extends AsyncTaskWithCallback<String, Void, Bitmap> {
-	private final static String TAG = DownloadFilmPosterTask.class.getName();
+	private final static String TAG = "cinedroid:" + DownloadFilmPosterTask.class.getSimpleName();
 
 	/**
 	 * @param callback
