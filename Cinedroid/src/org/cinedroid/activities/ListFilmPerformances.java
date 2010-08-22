@@ -55,8 +55,6 @@ import android.widget.TextView;
  */
 public class ListFilmPerformances extends ListActivity implements ActivityCallback {
 
-	private final static String TAG = ListFilmPerformances.class.getName();
-
 	public final static String CINEMA_ID = "cinema_id";
 	public final static String FILM_EDI = "film_edi";
 	public final static String FILM_TITLE = "film_title";
