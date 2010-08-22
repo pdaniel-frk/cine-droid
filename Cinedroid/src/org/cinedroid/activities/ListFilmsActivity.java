@@ -43,7 +43,7 @@ import android.widget.ListView;
 public class ListFilmsActivity extends ListActivity implements ActivityCallback {
 
 	public final static String CINEMA_ID = "cinema_id";
-
+	public final static String TERRITORY = "territory";
 	private FilmAdapter filmAdapter;
 	private ProgressDialog progressDialog;
 
@@ -88,8 +88,9 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 		setListAdapter(this.filmAdapter);
 
 		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
-		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, "GB");
 		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");
+
+		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, "GB");
 
 		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(this, ActivityCallback.NO_REF, this);
 		if (getIntent().hasExtra(CINEMA_ID)) {
