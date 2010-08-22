@@ -3,7 +3,7 @@
 
 = Introduction =
 
-Cinedroid allows you to browse performances listed by the [[Cineworld API|https://www.cineworld.co.uk/developer/api]] on an Android device.
+Cinedroid allows you to browse performances listed by the [https://www.cineworld.co.uk/developer/api Cineworld API] on an Android device.
 
 = List Cinemas =
 
