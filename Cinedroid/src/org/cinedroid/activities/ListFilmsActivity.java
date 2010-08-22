@@ -95,7 +95,7 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(this, ActivityCallback.NO_REF, this);
 		if (getIntent().hasExtra(CINEMA_ID)) {
 			int cinemaID = getIntent().getExtras().getInt(CINEMA_ID);
-			NameValuePair cinema = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, Integer.toString(cinemaID));
+			NameValuePair cinema = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(cinemaID));
 			retrieveFilmsTask.execute(key, territory, full, cinema);
 		}
 		else {
