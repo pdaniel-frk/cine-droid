@@ -111,11 +111,13 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 		String myCinemaName = this.settings.getString(Settings.SETTING_MYCINEMA_NAME, null);
 		int myCinemaId = this.settings.getInt(Settings.SETTING_MYCINEMA_ID, -1);
 		String myCinemaURL = this.settings.getString(Settings.SETTING_MYCINEMA_URL, null);
-		if (myCinemaName != null && myCinemaId != -1 && myCinemaURL != null) {
+		String myCinemaTerritory = this.settings.getString(Settings.SETTING_MYCINEMA_TERRITOTY, null);
+		if (myCinemaName != null && myCinemaId != -1 && myCinemaURL != null && myCinemaTerritory != null) {
 			Cinema myCinema = new Cinema();
 			myCinema.setName(myCinemaName);
 			myCinema.setId(myCinemaId);
 			myCinema.setUrl(myCinemaURL);
+			myCinema.setTerritory(myCinemaTerritory);
 			createHeader(myCinema);
 		}
 
@@ -221,6 +223,7 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 				editor.putString(Settings.SETTING_MYCINEMA_NAME, cinema.getName());
 				editor.putInt(Settings.SETTING_MYCINEMA_ID, cinema.getId());
 				editor.putString(Settings.SETTING_MYCINEMA_URL, cinema.getUrl());
+				editor.putString(Settings.SETTING_MYCINEMA_TERRITOTY, cinema.getTerritory());
 				editor.commit();
 				break;
 			case CONTEXT_VISIT_WEB:
@@ -242,6 +245,7 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 				editor.remove(Settings.SETTING_MYCINEMA_NAME);
 				editor.remove(Settings.SETTING_MYCINEMA_ID);
 				editor.remove(Settings.SETTING_MYCINEMA_URL);
+				editor.remove(Settings.SETTING_MYCINEMA_TERRITOTY);
 				editor.commit();
 				header.setVisibility(View.GONE);
 				break;

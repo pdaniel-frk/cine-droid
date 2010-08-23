@@ -32,6 +32,7 @@ public interface Settings {
 	public static final String SETTING_MYCINEMA_NAME = "myCinemaName";
 	public static final String SETTING_MYCINEMA_ID = "myCinemaID";
 	public static final String SETTING_MYCINEMA_URL = "myCinemaURL";
+	public static final String SETTING_MYCINEMA_TERRITOTY = "myCinemaTerritory";
 	/**
 	 * Key to use when retrieving values from {@link SharedPreferences}.
 	 */
