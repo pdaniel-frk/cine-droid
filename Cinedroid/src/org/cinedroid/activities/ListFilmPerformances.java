@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.CinemaPerformanceAdapter;
+import org.cinedroid.constants.Extras;
 import org.cinedroid.data.impl.FilmDate;
 import org.cinedroid.data.impl.FilmPerformance;
 import org.cinedroid.tasks.AbstractCineworldTask;
@@ -55,14 +56,6 @@ import android.widget.TextView;
  */
 public class ListFilmPerformances extends ListActivity implements ActivityCallback {
 
-	public final static String CINEMA_ID = "cinema_id";
-	public final static String FILM_EDI = "film_edi";
-	public final static String FILM_TITLE = "film_title";
-	public final static String POSTER_URL = "poster_url";
-	public final static String FILM_URL = "film_url";
-	public final static String RATING = "rating";
-	public final static String ADVISORY = "advisory";
-
 	private final static int IMAGE_DOWNLOADED = 0;
 	private final static int DATES_RETRIEVED = 1;
 	private final static int PERFORMANCES_RETRIEVED = 2;
@@ -71,6 +64,7 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 	private BasicNameValuePair cinemaId;
 	private BasicNameValuePair filmEdi;
 	private BasicNameValuePair key;
+	private BasicNameValuePair territory;
 	private String posterURL;
 
 	private View contentView;
@@ -92,7 +86,7 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 	public void onDatesRetrieved(final List<FilmDate> filmDates) {
 		RetrievePerformancesTask retrievePerformancesTask = new RetrievePerformancesTask(this, PERFORMANCES_RETRIEVED, this,
 				filmDates.toArray(new FilmDate[filmDates.size()]));
-		retrievePerformancesTask.execute(this.cinemaId, this.filmEdi, this.key);
+		retrievePerformancesTask.execute(this.cinemaId, this.filmEdi, this.key, this.territory);
 	}
 
 	public void onPerformanceRecieved(final List<FilmDate> filmDates) {
@@ -220,7 +214,8 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		ActivityUtils.checkExtras(getIntent(), CINEMA_ID, FILM_EDI, FILM_TITLE, POSTER_URL, FILM_URL, RATING, ADVISORY);
+		ActivityUtils.checkExtras(getIntent(), Extras.CINEMA_ID, Extras.TERRITORY, Extras.FILM_EDI, Extras.FILM_TITLE, Extras.POSTER_URL,
+				Extras.FILM_URL, Extras.RATING, Extras.ADVISORY);
 		this.contentView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.film_performances_list,
 				null);
 		setContentView(this.contentView);
@@ -230,12 +225,12 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 
 		Bundle extras = getIntent().getExtras();
 		TextView filmName = (TextView) findViewById(R.id.FilmTitle);
-		filmName.setText(extras.getString(FILM_TITLE));
+		filmName.setText(extras.getString(Extras.FILM_TITLE));
 
 		TextView filmRating = (TextView) findViewById(R.id.FilmRating);
-		filmRating.setText(String.format("Cert. %s", extras.getString(RATING)));
+		filmRating.setText(String.format("Cert. %s", extras.getString(Extras.RATING)));
 
-		final String filmURL = extras.getString(FILM_URL);
+		final String filmURL = extras.getString(Extras.FILM_URL);
 		Button webButton = (Button) findViewById(R.id.FilmURL);
 		webButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -248,12 +243,14 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 			}
 		});
 
-		this.cinemaId = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(getIntent().getExtras().getInt(CINEMA_ID)));
-		this.filmEdi = new BasicNameValuePair(CineworldAPIAssistant.FILM, Integer.toString(getIntent().getExtras().getInt(FILM_EDI)));
+		this.cinemaId = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(extras.getInt(Extras.CINEMA_ID)));
+		this.filmEdi = new BasicNameValuePair(CineworldAPIAssistant.FILM, Integer.toString(extras.getInt(Extras.FILM_EDI)));
 		this.key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
-		this.posterURL = extras.getString(POSTER_URL);
+		this.posterURL = extras.getString(Extras.POSTER_URL);
+		this.territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, extras.getString(Extras.TERRITORY));
+
 		new DownloadFilmPosterTask(this, IMAGE_DOWNLOADED).execute(this.posterURL);
-		new RetrieveDatesTask(this, DATES_RETRIEVED, this).execute(this.cinemaId, this.filmEdi, this.key);
+		new RetrieveDatesTask(this, DATES_RETRIEVED, this).execute(this.cinemaId, this.filmEdi, this.key, this.territory);
 	}
 
 	/*

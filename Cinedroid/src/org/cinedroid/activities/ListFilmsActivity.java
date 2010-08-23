@@ -21,12 +21,14 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.FilmAdapter;
+import org.cinedroid.constants.Extras;
 import org.cinedroid.data.impl.Film;
 import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
 import org.cinedroid.tasks.handler.ActivityCallback;
 import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import org.cinedroid.tasks.impl.RetrieveFilmsTask;
+import org.cinedroid.util.ActivityUtils;
 import org.cinedroid.util.CineworldAPIAssistant;
 
 import android.app.ListActivity;
@@ -42,8 +44,6 @@ import android.widget.ListView;
  */
 public class ListFilmsActivity extends ListActivity implements ActivityCallback {
 
-	public final static String CINEMA_ID = "cinema_id";
-	public final static String TERRITORY = "territory";
 	private FilmAdapter filmAdapter;
 	private ProgressDialog progressDialog;
 
@@ -58,14 +58,15 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 
 		Intent viewFilmsPerformancesIntent = new Intent(this, ListFilmPerformances.class);
 		Film selectedFilm = this.filmAdapter.getItem(position);
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.CINEMA_ID, getIntent().getExtras().getInt(CINEMA_ID));
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.FILM_EDI, selectedFilm.getEdi());
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.FILM_TITLE, selectedFilm.getTitle());
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.POSTER_URL, selectedFilm.getPosterUrl());
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.FILM_URL, selectedFilm.getFilmUrl());
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.RATING, selectedFilm.getClassification());
-		viewFilmsPerformancesIntent.putExtra(ListFilmPerformances.ADVISORY, selectedFilm.getAdvisory());
-
+		Bundle extras = getIntent().getExtras();
+		viewFilmsPerformancesIntent.putExtra(Extras.CINEMA_ID, extras.getInt(Extras.CINEMA_ID));
+		viewFilmsPerformancesIntent.putExtra(Extras.TERRITORY, extras.getString(Extras.TERRITORY));
+		viewFilmsPerformancesIntent.putExtra(Extras.FILM_EDI, selectedFilm.getEdi());
+		viewFilmsPerformancesIntent.putExtra(Extras.FILM_TITLE, selectedFilm.getTitle());
+		viewFilmsPerformancesIntent.putExtra(Extras.POSTER_URL, selectedFilm.getPosterUrl());
+		viewFilmsPerformancesIntent.putExtra(Extras.FILM_URL, selectedFilm.getFilmUrl());
+		viewFilmsPerformancesIntent.putExtra(Extras.RATING, selectedFilm.getClassification());
+		viewFilmsPerformancesIntent.putExtra(Extras.ADVISORY, selectedFilm.getAdvisory());
 		this.startActivity(viewFilmsPerformancesIntent);
 	}
 
@@ -84,6 +85,8 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.cinema_list);
 
+		ActivityUtils.checkExtras(getIntent(), Extras.CINEMA_ID, Extras.TERRITORY);
+
 		this.filmAdapter = new FilmAdapter(this);
 		setListAdapter(this.filmAdapter);
 		getListView().setTextFilterEnabled(true);
@@ -91,17 +94,13 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
 		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");
 
-		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, "GB");
-
 		RetrieveFilmsTask retrieveFilmsTask = new RetrieveFilmsTask(this, ActivityCallback.NO_REF, this);
-		if (getIntent().hasExtra(CINEMA_ID)) {
-			int cinemaID = getIntent().getExtras().getInt(CINEMA_ID);
-			NameValuePair cinema = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(cinemaID));
-			retrieveFilmsTask.execute(key, territory, full, cinema);
-		}
-		else {
-			retrieveFilmsTask.execute(key, territory, full);
-		}
+
+		Bundle extras = getIntent().getExtras();
+		NameValuePair cinema = new BasicNameValuePair(CineworldAPIAssistant.CINEMA, Integer.toString(extras.getInt(Extras.CINEMA_ID)));
+		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, extras.getString(Extras.TERRITORY));
+
+		retrieveFilmsTask.execute(key, territory, full, cinema);
 
 		this.progressDialog = ProgressDialog.show(this, "", "Retrieving films, please wait...", false);
 	}
