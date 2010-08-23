@@ -15,9 +15,13 @@
  */
 package org.cinedroid.tasks.impl;
 
+import java.util.List;
+
+import org.apache.http.NameValuePair;
 import org.cinedroid.data.impl.Cinema;
 import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.handler.ActivityCallback;
+import org.cinedroid.util.CineworldAPIAssistant;
 import org.cinedroid.util.CineworldAPIAssistant.API_METHOD;
 
 import android.content.Context;
@@ -30,12 +34,46 @@ import android.content.Context;
 public class RetrieveCinemasTask extends AbstractCineworldTask<Void, Cinema> {
 
 	/**
+	 * The territory these cinemas are for.
+	 */
+	private String territory = "GB";
+
+	/**
 	 * @param callback
 	 * @param ref
 	 * @param context
 	 */
 	public RetrieveCinemasTask(final ActivityCallback callback, final int ref, final Context context) {
 		super(callback, ref, context);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#doInBackground(org.apache.http.NameValuePair[])
+	 */
+	@Override
+	protected List<Cinema> doInBackground(final NameValuePair... params) {
+		for (NameValuePair vp : params) {
+			if (CineworldAPIAssistant.TERRITORY.equals(vp.getName())) {
+				this.territory = vp.getValue();
+				break;
+			}
+		}
+		return super.doInBackground(params);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cinedroid.tasks.AbstractCineworldTask#onPostExecute(java.util.List)
+	 */
+	@Override
+	protected void onPostExecute(final List<Cinema> result) {
+		for (Cinema cinema : result) {
+			cinema.setTerritory(this.territory);
+		}
+		super.onPostExecute(result);
 	}
 
 	/*

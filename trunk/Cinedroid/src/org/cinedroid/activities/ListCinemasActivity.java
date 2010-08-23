@@ -21,6 +21,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.cinedroid.R;
 import org.cinedroid.adapters.CinemaLocationAdapter;
+import org.cinedroid.constants.Extras;
+import org.cinedroid.constants.Settings;
 import org.cinedroid.data.impl.Cinema;
 import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
@@ -54,14 +56,6 @@ import android.widget.TextView;
 public class ListCinemasActivity extends ListActivity implements ActivityCallback {
 
 	/**
-	 * Settings keys
-	 */
-	private static final String SETTING_TERRITORY = "territory";
-	private static final String SETTING_MYCINEMA_NAME = "myCinemaName";
-	private static final String SETTING_MYCINEMA_ID = "myCinemaID";
-	private static final String SETTING_MYCINEMA_URL = "myCinemaURL";
-
-	/**
 	 * Context menu ids.
 	 */
 	private final static int CONTEXT_SET_FAV = 0;
@@ -93,11 +87,11 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 	@Override
 	protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
 		super.onListItemClick(l, v, position, id);
-		Cinema cinemaLocation = this.cinemaLocationAdapter.getItem(position);
+		Cinema cinema = this.cinemaLocationAdapter.getItem(position);
 
 		Intent viewFilmsIntent = new Intent(this, ListFilmsActivity.class);
-		viewFilmsIntent.putExtra(ListFilmsActivity.CINEMA_ID, cinemaLocation.getId());
-
+		viewFilmsIntent.putExtra(Extras.CINEMA_ID, cinema.getId());
+		viewFilmsIntent.putExtra(Extras.TERRITORY, cinema.getTerritory());
 		this.startActivity(viewFilmsIntent);
 	}
 
@@ -111,12 +105,12 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.cinema_list);
 
-		this.settings = getSharedPreferences("org.cineworld", MODE_PRIVATE);
+		this.settings = getSharedPreferences(Settings.SHARED_PREF_KEY, MODE_PRIVATE);
 
 		// Create header if user has a favorite cinema.
-		String myCinemaName = this.settings.getString(SETTING_MYCINEMA_NAME, null);
-		int myCinemaId = this.settings.getInt(SETTING_MYCINEMA_ID, -1);
-		String myCinemaURL = this.settings.getString(SETTING_MYCINEMA_URL, null);
+		String myCinemaName = this.settings.getString(Settings.SETTING_MYCINEMA_NAME, null);
+		int myCinemaId = this.settings.getInt(Settings.SETTING_MYCINEMA_ID, -1);
+		String myCinemaURL = this.settings.getString(Settings.SETTING_MYCINEMA_URL, null);
 		if (myCinemaName != null && myCinemaId != -1 && myCinemaURL != null) {
 			Cinema myCinema = new Cinema();
 			myCinema.setName(myCinemaName);
@@ -166,8 +160,8 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 				public void onClick(final View v) {
 					Intent viewFilmsIntent = new Intent(ListCinemasActivity.this, ListFilmsActivity.class);
 					Cinema c = (Cinema) v.getTag();
-					viewFilmsIntent.putExtra(ListFilmsActivity.CINEMA_ID, c.getId());
-
+					viewFilmsIntent.putExtra(Extras.CINEMA_ID, c.getId());
+					viewFilmsIntent.putExtra(Extras.TERRITORY, c.getTerritory());
 					ListCinemasActivity.this.startActivity(viewFilmsIntent);
 				}
 			});
@@ -178,7 +172,8 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 	 * Retrieve the cinemas from the Cineworld API.
 	 */
 	public void retrieveCinemas() {
-		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, this.settings.getString(SETTING_TERRITORY, "GB"));
+		NameValuePair territory = new BasicNameValuePair(CineworldAPIAssistant.TERRITORY, this.settings.getString(
+				Settings.SETTING_TERRITORY, "GB"));
 		NameValuePair full = new BasicNameValuePair(CineworldAPIAssistant.FULL, "true");
 		NameValuePair key = new BasicNameValuePair(CineworldAPIAssistant.KEY, getString(R.string.cineworld_api_key));
 		new RetrieveCinemasTask(this, ActivityCallback.NO_REF, this).execute(territory, full, key);
@@ -223,9 +218,9 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 			case CONTEXT_SET_FAV:
 				createHeader(cinema);
 				SharedPreferences.Editor editor = this.settings.edit();
-				editor.putString(SETTING_MYCINEMA_NAME, cinema.getName());
-				editor.putInt(SETTING_MYCINEMA_ID, cinema.getId());
-				editor.putString(SETTING_MYCINEMA_URL, cinema.getUrl());
+				editor.putString(Settings.SETTING_MYCINEMA_NAME, cinema.getName());
+				editor.putInt(Settings.SETTING_MYCINEMA_ID, cinema.getId());
+				editor.putString(Settings.SETTING_MYCINEMA_URL, cinema.getUrl());
 				editor.commit();
 				break;
 			case CONTEXT_VISIT_WEB:
@@ -244,9 +239,9 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 			switch (item.getItemId()) {
 			case CONTEXT_REM_FAV:
 				SharedPreferences.Editor editor = this.settings.edit();
-				editor.remove(SETTING_MYCINEMA_NAME);
-				editor.remove(SETTING_MYCINEMA_ID);
-				editor.remove(SETTING_MYCINEMA_URL);
+				editor.remove(Settings.SETTING_MYCINEMA_NAME);
+				editor.remove(Settings.SETTING_MYCINEMA_ID);
+				editor.remove(Settings.SETTING_MYCINEMA_URL);
 				editor.commit();
 				header.setVisibility(View.GONE);
 				break;
@@ -284,7 +279,7 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 	public boolean onPrepareOptionsMenu(final Menu menu) {
 		MenuItem gb = menu.findItem(R.id.GB);
 		MenuItem ie = menu.findItem(R.id.IE);
-		String current = this.settings.getString(SETTING_TERRITORY, "GB");
+		String current = this.settings.getString(Settings.SETTING_TERRITORY, "GB");
 		ColorMatrix matrix = new ColorMatrix();
 		matrix.setSaturation(0.0f);
 		ColorFilter filter = new ColorMatrixColorFilter(matrix);
@@ -306,12 +301,12 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
-		String current = this.settings.getString(SETTING_TERRITORY, "GB");
+		String current = this.settings.getString(Settings.SETTING_TERRITORY, "GB");
 		switch (item.getItemId()) {
 		case R.id.GB:
 			if (!current.equals("GB")) {
 				SharedPreferences.Editor editor = this.settings.edit();
-				editor.putString(SETTING_TERRITORY, "GB");
+				editor.putString(Settings.SETTING_TERRITORY, "GB");
 				editor.commit();
 				retrieveCinemas();
 			}
@@ -319,7 +314,7 @@ public class ListCinemasActivity extends ListActivity implements ActivityCallbac
 		case R.id.IE:
 			if (!current.equals("IE")) {
 				SharedPreferences.Editor editor = this.settings.edit();
-				editor.putString(SETTING_TERRITORY, "IE");
+				editor.putString(Settings.SETTING_TERRITORY, "IE");
 				editor.commit();
 				retrieveCinemas();
 			}

@@ -31,6 +31,7 @@ public class Cinema implements CineworldData {
 	protected String address;
 	protected String postcode;
 	protected String phone;
+	protected String territory;
 
 	/**
 	 * @return the id
@@ -120,6 +121,21 @@ public class Cinema implements CineworldData {
 	 */
 	public void setPhone(final String phone) {
 		this.phone = phone;
+	}
+
+	/**
+	 * @return the territory
+	 */
+	public String getTerritory() {
+		return this.territory;
+	}
+
+	/**
+	 * @param territory
+	 *            the territory to set
+	 */
+	public void setTerritory(final String territory) {
+		this.territory = territory;
 	}
 
 	/*
