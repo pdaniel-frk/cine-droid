@@ -70,8 +70,11 @@ public class RetrieveCinemasTask extends AbstractCineworldTask<Void, Cinema> {
 	 */
 	@Override
 	protected void onPostExecute(final List<Cinema> result) {
-		for (Cinema cinema : result) {
-			cinema.setTerritory(this.territory);
+		// Results can be null if an error has occurred
+		if (result != null) {
+			for (Cinema cinema : result) {
+				cinema.setTerritory(this.territory);
+			}
 		}
 		super.onPostExecute(result);
 	}
