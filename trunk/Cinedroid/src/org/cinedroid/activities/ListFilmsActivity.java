@@ -26,7 +26,6 @@ import org.cinedroid.data.impl.Film;
 import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
 import org.cinedroid.tasks.handler.ActivityCallback;
-import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import org.cinedroid.tasks.impl.RetrieveFilmsTask;
 import org.cinedroid.util.ActivityUtils;
 import org.cinedroid.util.CineworldAPIAssistant;
@@ -119,7 +118,7 @@ public class ListFilmsActivity extends ListActivity implements ActivityCallback 
 			}
 		}
 		else {
-			if (task instanceof RetrieveCinemasTask) {
+			if (task instanceof AbstractCineworldTask) {
 				final AbstractCineworldTask cineworldTask = (AbstractCineworldTask) task;
 				CineworldAPIAssistant.createCineworldAPIErrorDialog(this, cineworldTask);
 			}

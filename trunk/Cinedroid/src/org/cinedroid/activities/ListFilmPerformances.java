@@ -27,7 +27,6 @@ import org.cinedroid.tasks.AbstractCineworldTask;
 import org.cinedroid.tasks.AsyncTaskWithCallback;
 import org.cinedroid.tasks.handler.ActivityCallback;
 import org.cinedroid.tasks.impl.DownloadFilmPosterTask;
-import org.cinedroid.tasks.impl.RetrieveCinemasTask;
 import org.cinedroid.tasks.impl.RetrieveDatesTask;
 import org.cinedroid.tasks.impl.RetrievePerformancesTask;
 import org.cinedroid.util.ActivityUtils;
@@ -283,13 +282,14 @@ public class ListFilmPerformances extends ListActivity implements ActivityCallba
 			}
 		}
 		else {
-			if (task instanceof RetrieveCinemasTask) {
+			if (task instanceof AbstractCineworldTask) {
 				final AbstractCineworldTask cineworldTask = (AbstractCineworldTask) task;
 				CineworldAPIAssistant.createCineworldAPIErrorDialog(this, cineworldTask);
 			}
 			else {
 				throw new IllegalArgumentException(String.format("Unexpected type %s", task.getClass().getName()));
 			}
+
 		}
 
 	}
