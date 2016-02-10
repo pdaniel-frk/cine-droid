@@ -1,0 +1,1 @@
+Cinedroid is an Android app for accessing the [Cineworld API](https://www.cineworld.co.uk/developer).
